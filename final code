@@ -1,0 +1,36 @@
+class Calculator:
+    def __init__(self):
+        self.number1 = float(input("Enter a number: "))
+        self.number2 = float(input("Enter another number: "))
+        self.math = input("Specify the operation (add, subtract, multiply, divide): ")
+
+    def operation(self):
+        if self.math == "add":
+            return self.add(self.number1, self.number2)
+        elif self.math == "subtract":
+            return self.subtract(self.number1, self.number2)
+        elif self.math == "multiply":
+            return self.multiply(self.number1, self.number2)
+        elif self.math == "divide":
+            return self.divide(self.number1, self.number2)
+        else:
+            return "Invalid operation"
+
+    def add(self, number1, number2):
+        return number1 + number2
+
+    def subtract(self, number1, number2):
+        return number1 - number2
+
+    def multiply(self, number1, number2):
+        return number1 * number2
+
+    def divide(self, number1, number2):
+        if number2 != 0:
+            return number1 / number2
+        else:
+            return "Error: Division by zero"
+
+
+calc = Calculator()
+print(calc.operation())
