@@ -1,0 +1,419 @@
+explain to me what's wrong with this code
+
+class calculator:
+    number1 = input("Enter a number: ")
+    number2 = input("Enter another number: ")
+    math = input("Specify the operation(add, subtract, multiply, divide): ")
+
+
+ def operation(self):
+         if self.math == "add":
+             return self.add(self.number1, self.number2)
+         elif self.math == "subtract":
+             return self.subtract(self.number1, self.number2)
+        elif self.math == "multiply":
+            return self.multiply(self.number1, self.number2)
+        elif self.math == "divide":
+           return self.divide(self.number1, self.number2)
+        else:
+            return "Invalid operation"
+       
+
+
+    def add(self, number1, number2):
+        return number1 + number2
+
+
+    def subtract(self, number1, number2):
+        return number1 - number2
+
+
+    def multiply(self, number1, number2):
+        return number1 * number2
+
+
+    def divide(self, number1, number2):
+        if number2 != 0:
+            return number1 / number2
+        else:
+            return "Error: Division by zero"
+Reviewed 10 sources
+There are several separate problems in this code: indentation, class design, and data types.
+
+Syntax and indentation
+The method def operation(self): is not indented inside the class body.
+In Python, all methods must be indented under the class definition:
+
+python
+class Calculator:
+    def operation(self):
+        ...
+The same applies to add, subtract, multiply, and divide: they all need to line up under the class, at the same indentation level as operation.
+
+Right now, Python will treat operation and the others as top‑level functions, not as part of the class, and this will raise errors.
+
+Class vs instance attributes
+You wrote:
+
+python
+class calculator:
+    number1 = input("Enter a number: ")
+    number2 = input("Enter another number: ")
+    math = input("Specify the operation(add, subtract, multiply, divide): ")
+These are class attributes, so they are evaluated once when the class is defined, not per object.
+
+Normally, you want instance attributes set in an __init__ method:
+
+python
+class Calculator:
+    def __init__(self):
+        self.number1 = float(input("Enter a number: "))
+        self.number2 = float(input("Enter another number: "))
+        self.math = input("Specify the operation (add, subtract, multiply, divide): ")
+Without __init__, self.number1 etc. will not exist on the instance unless you rely on the class attributes, which is confusing and bad practice.
+
+Missing parentheses when calling methods
+In operation, you do:
+
+python
+return self.add(self.number1, self.number2)
+but your add method is defined as:
+
+python
+def add(self, number1, number2):
+    return number1 + number2
+This part is actually structurally fine, but only if the method is correctly indented inside the class.
+
+The important part is that operation needs to be inside the class and you must create an instance and call it, for example:
+
+python
+calc = Calculator()
+print(calc.operation())
+If you never instantiate the class and never call operation, nothing will run.
+
+Everything from input is a string
+input() returns a string, so:
+
+python
+number1 = input("Enter a number: ")
+number2 = input("Enter another number: ")
+makes number1 and number2 strings.
+
+Then add will do string concatenation, not numeric addition, and subtract, multiply, divide will fail with TypeError.
+
+Convert inputs to numbers:
+
+python
+self.number1 = float(input("Enter a number: "))
+self.number2 = float(input("Enter another number: "))
+Putting it all together (fixed version)
+Here is a cleaned‑up version that matches what you were trying to do:
+
+python
+class Calculator:
+    def __init__(self):
+        self.number1 = float(input("Enter a number: "))
+        self.number2 = float(input("Enter another number: "))
+        self.math = input("Specify the operation (add, subtract, multiply, divide): ")
+
+    def operation(self):
+        if self.math == "add":
+            return self.add(self.number1, self.number2)
+        elif self.math == "subtract":
+            return self.subtract(self.number1, self.number2)
+        elif self.math == "multiply":
+            return self.multiply(self.number1, self.number2)
+        elif self.math == "divide":
+            return self.divide(self.number1, self.number2)
+        else:
+            return "Invalid operation"
+
+    def add(self, number1, number2):
+        return number1 + number2
+
+    def subtract(self, number1, number2):
+        return number1 - number2
+
+    def multiply(self, number1, number2):
+        return number1 * number2
+
+    def divide(self, number1, number2):
+        if number2 != 0:
+            return number1 / number2
+        else:
+            return "Error: Division by zero"
+
+
+calc = Calculator()
+print(calc.operation())
+If you paste this into a file and run it, it will prompt for two numbers and an operation, then print the result.
+
+class calculator:
+    number1 = input("Enter a number: ")
+    number2 = input("Enter another number: ")
+    math = input("Specify the operation(add, subtract, multiply, divide): ")
+
+
+    def operation(self):
+         if self.math == "add":
+             return self.add(self.number1, self.number2)
+         elif self.math == "subtract":
+             return self.subtract(self.number1, self.number2)
+        elif self.math == "multiply":
+            return self.multiply(self.number1, self.number2)
+        elif self.math == "divide":
+           return self.divide(self.number1, self.number2)
+        else:
+            return "Invalid operation"
+       
+
+
+    def add(self, number1, number2):
+        return number1 + number2
+
+
+    def subtract(self, number1, number2):
+        return number1 - number2
+
+
+    def multiply(self, number1, number2):
+        return number1 * number2
+
+
+    def divide(self, number1, number2):
+        if number2 != 0:
+            return number1 / number2
+        else:
+            return "Error: Division by zero"
+       
+calc = calculator()
+result = calc.operation()
+print("The result is: " + float(result))
+
+tell me whether or not this code is better than the last set of code i wrote; if it's not then explain to me why not & what to change about this set of code to make it better
+Reviewed 10 sources
+This version is closer to working, but it is not better yet because it still has design issues and at least one runtime error.
+​
+
+What is still wrong
+input() still returns strings, so all arithmetic uses strings unless you convert them.
+​
+
+"2" + "3" becomes "23" (string concatenation), not numeric 5.
+​
+
+At the bottom you have:
+
+python
+print("The result is: " + float(result))
+This tries to concatenate a string with a float, which raises TypeError: can only concatenate str (not "float") to str.
+​
+
+The class still uses class attributes (number1, number2, math directly under the class) instead of setting instance attributes in __init__, which is poor style and confusing.
+​
+
+How to improve this code
+Here is a better version fixing those problems:
+
+python
+class Calculator:
+    def __init__(self):
+        self.number1 = float(input("Enter a number: "))
+        self.number2 = float(input("Enter another number: "))
+        self.math = input("Specify the operation (add, subtract, multiply, divide): ")
+
+    def operation(self):
+        if self.math == "add":
+            return self.add(self.number1, self.number2)
+        elif self.math == "subtract":
+            return self.subtract(self.number1, self.number2)
+        elif self.math == "multiply":
+            return self.multiply(self.number1, self.number2)
+        elif self.math == "divide":
+            return self.divide(self.number1, self.number2)
+        else:
+            return "Invalid operation"
+
+    def add(self, number1, number2):
+        return number1 + number2
+
+    def subtract(self, number1, number2):
+        return number1 - number2
+
+    def multiply(self, number1, number2):
+        return number1 * number2
+
+    def divide(self, number1, number2):
+        if number2 != 0:
+            return number1 / number2
+        else:
+            return "Error: Division by zero"
+
+
+calc = Calculator()
+result = calc.operation()
+print("The result is:", result)   # no TypeError
+Key changes:
+
+Converted inputs to float so math works numerically, not as strings.
+​
+
+Moved values into __init__ so they become instance attributes (self.number1, etc.).
+​
+
+Printed with a comma instead of +, which avoids string–float concatenation errors.
+​
+
+based on the mistakes made with my code in both instances what do i need to do to make better functioning code that passes hiring interviews as a beginner programmer who just tried their hand at making their first project in code with little to no prior experience other than learning the basics via learnpython's website
+Reviewed 10 sources
+You already did the most important thing: you wrote code, ran it, and noticed what broke. That is exactly how beginners grow into employable developers.
+​
+
+1. Key lessons from your calculator
+From your two versions, you have already bumped into several core ideas that interviewers care about:
+
+Types matter
+
+input() always gives a string; if you want numbers, you must convert with int() or float().
+​
+
+Mixing strings and numbers ("The result is: " + 3.5) causes type errors; use commas in print() or str(result).
+​
+
+Class vs instance state
+
+Putting number1 = input(...) directly in the class body creates class variables executed only once on definition, not per object.
+​
+
+A more interview‑friendly pattern is:
+
+python
+class Calculator:
+    def __init__(self, number1, number2, op):
+        self.number1 = number1
+        self.number2 = number2
+        self.op = op
+and ask for input outside the class.
+
+Structure and readability
+
+Clear method names (add, subtract) and an operation dispatcher are good design instincts.
+​
+
+You can push this further by separating “pure logic” from “input/output” (explained next).
+
+These are exactly the kinds of mistakes beginners make and then fix; interviewers expect you to have gone through this learning already.
+​
+
+2. How to rewrite your calculator in an interview‑ready style
+A version closer to what passes in beginner interviews:
+
+python
+def calculate(a, b, op):
+    if op == "add":
+        return a + b
+    elif op == "subtract":
+        return a - b
+    elif op == "multiply":
+        return a * b
+    elif op == "divide":
+        if b == 0:
+            raise ZeroDivisionError("division by zero")
+        return a / b
+    else:
+        raise ValueError("unsupported operation")
+
+
+def main():
+    a = float(input("Enter a number: "))
+    b = float(input("Enter another number: "))
+    op = input("Specify the operation (add, subtract, multiply, divide): ")
+
+    try:
+        result = calculate(a, b, op)
+        print("The result is:", result)
+    except (ZeroDivisionError, ValueError) as e:
+        print("Error:", e)
+
+
+if __name__ == "__main__":
+    main()
+Why this is better for interviews:
+
+Logic in one small, testable function (calculate), separate from user interaction.
+​
+
+Explicit error handling (raise and try/except), which interviewers like to see.
+​
+
+Clear entry point if __name__ == "__main__":, which is a recommended pattern in tutorials and real projects.
+​
+
+Once you are comfortable with this functional style, you can wrap it in a class if asked, but the key qualities—clean structure, explicit types, tested logic—remain the same.
+​
+
+3. Concrete habits that make you “interview ready”
+Over the next weeks, focus on these habits; they translate directly into better interview code:
+
+Slow down before coding
+
+In interviews, restate the problem in your own words and list a few examples before writing code. This avoids building the wrong thing.
+​
+
+Always test with a few cases
+
+For a calculator:
+
+Normal: 2 add 3 → 5
+
+Edge: 2 divide 0 → error
+
+Invalid: 2 foo 3 → error
+
+This mirrors how interviewers test your code.
+​
+
+Practice small, focused functions
+
+Write functions that do one thing (e.g., calculate), with clear inputs and outputs.
+​
+
+Then write a tiny main() or “driver” that handles input/output.
+
+Choose the right‑sized projects
+
+Stick with small projects that emphasize basics: calculators, to‑do lists, number guessing games, simple text menus.
+​
+
+Each project should introduce one or two new ideas, not everything at once.
+​
+
+Refactor old code instead of only starting new
+
+Take your existing calculator and improve it: better error messages, a loop to perform multiple operations, maybe exponentiation or memory.
+​
+
+This “iterate and improve” mindset is exactly how professional developers work.
+​
+
+4. How to practice like you’re preparing for interviews
+As a beginner from LearnPython and similar resources, a good path is:
+
+Rotate between learning and doing
+
+Follow a short tutorial, then build or extend a tiny project based on it (e.g., extend your calculator with a history list).
+​
+
+Focus on fundamentals interviewers care about early
+
+Working with lists, strings, dictionaries.
+
+Writing and calling functions.
+
+Understanding basic errors and exceptions.
+​
+
+Use simple tools like print() tests and manual inputs at first
+
+Then gradually learn how to write tiny tests (e.g., call calculate(2, 3, "add") directly in a REPL) before wrapping it with input().
+​
